@@ -42,7 +42,7 @@ RUN ldconfig
 
 # snortunsock
 RUN wget --no-check-certificate \
-        https://xxxxxxxx\
+        https://github.com/bengo237/snort-docker/raw/main/snortunsock-master.zip\
     && unzip master.zip
 
 # ENV SNORT_RULES_SNAPSHOT 2972
