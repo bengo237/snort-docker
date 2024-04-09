@@ -1,5 +1,6 @@
 # Snort in Docker
 FROM ubuntu:20.04
+LABEL maintainer="Dylane Bengono <chaneldylanebengono@gmail.com>"
 
 RUN apt-get update && \
     apt-get install -y \
