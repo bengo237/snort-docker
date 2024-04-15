@@ -2,6 +2,12 @@
 
 [Snort](https://www.snort.org/) in Docker for Network Functions Virtualization (NFV)
 
+
+# Verify Snort setting 
+```
+$ snort -c /usr/local/etc/snort/snort.lua 
+```
+
 # Docker Usage
 You may need to run as `sudo`
 Attach the snort in container to have full access to the network
