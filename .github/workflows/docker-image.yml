@@ -28,4 +28,4 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ghcr.io/adorsys/snort3:latest
+        tags: ghcr.io/bengo237/snort3:latest
