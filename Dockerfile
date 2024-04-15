@@ -1,87 +1,68 @@
 # Snort in Docker
-FROM ubuntu:20.04
+ARG UBUNTU_VERSION="focal-20230126"
+FROM ubuntu:${UBUNTU_VERSION}
 LABEL maintainer="Dylane Bengono <chaneldylanebengono@gmail.com>"
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt -y install \
+    git libtool pkg-config autoconf gettext \
+    libpcap-dev g++ vim make cmake wget libssl-dev \
+    liblzma-dev pip unzip protobuf-compiler \
+    golang-goprotobuf-dev
 
-RUN apt-get update && \
-    apt-get install -y \
-        python3-setuptools \
-        python3-pip \
-        python3-dev \
-        wget \
-        build-essential \
-        bison \
-        flex \
-        libpcap-dev \
-        libpcre3-dev \
-        libdumbnet-dev \
-        zlib1g-dev \
-        libnetfilter-queue1 \
-        tcpdump \
-        unzip \
-        vim && pip3 install -U pip dpkt snortunsock
+ENV GO_BIN=go1.20.linux-amd64.tar.gz
+RUN wget https://dl.google.com/go/${GO_BIN} \
+    && tar -xvf ${GO_BIN} \
+    && mv go /usr/local \
+    && rm -rf ${GO_BIN}
+RUN export PATH=$PATH:/usr/local/go/bin
+RUN ln -s /usr/local/go/bin/go /usr/local/bin/go
 
-# Define working directory.
-WORKDIR /opt
+RUN go install github.com/golang/protobuf/protoc-gen-go@latest
+RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+RUN cp /root/go/bin/protoc-gen-go /usr/local/bin/.
+RUN cp /root/go/bin/protoc-gen-go-grpc /usr/local/bin/.
 
-ENV DAQ_VERSION 2.0.6
-RUN wget https://www.snort.org/downloads/archive/snort/daq-${DAQ_VERSION}.tar.gz \
-    && tar xvfz daq-${DAQ_VERSION}.tar.gz \
-    && cd daq-${DAQ_VERSION} \
-    && ./configure; make; make install
+RUN mkdir /work
+RUN mkdir /packages
 
-ENV SNORT_VERSION 2.9.8.2
-RUN wget https://www.snort.org/downloads/archive/snort/snort-${SNORT_VERSION}.tar.gz \
-    && tar xvfz snort-${SNORT_VERSION}.tar.gz \
-    && cd snort-${SNORT_VERSION} \
-    && ./configure; make; make install
+# build libdaq
+ENV LIBDAQ_VERSION=3.0.10
+RUN cd /work && wget https://github.com/snort3/libdaq/archive/refs/tags/v${LIBDAQ_VERSION}.tar.gz
+RUN cd /work && tar -xvf v${LIBDAQ_VERSION}.tar.gz
+RUN cd /work/libdaq-${LIBDAQ_VERSION} && ./bootstrap && ./configure && make && make install
+RUN cd /work && rm -rf v${LIBDAQ_VERSION}.tar.gz
 
-RUN ldconfig
+RUN cd /work && wget https://github.com/ofalk/libdnet/archive/refs/tags/libdnet-1.14.tar.gz
+RUN cd /work && tar -xvf libdnet-1.14.tar.gz && cd libdnet-libdnet-1.14 && ./configure && make && make install
+RUN cd /work && rm -rf libdnet-libdnet-1.14 && rm libdnet-1.14.tar.gz
 
-# pigrelay
-# RUN wget --no-check-certificate \
-#         https://github.com/bengo237/snort-docker/raw/develop/snortunsock-master.zip \
-#     && unzip snortunsock-master.zip
+RUN cd /work && wget https://github.com/westes/flex/files/981163/flex-2.6.4.tar.gz
+RUN cd /work && tar -xvf flex-2.6.4.tar.gz && cd flex-2.6.4 && ./configure && make && make install
+RUN cd /work && rm -rf flex-2.6.4 && rm flex-2.6.4.tar.gz
 
-# snortunsock
-RUN wget --no-check-certificate \
-        https://github.com/bengo237/snort-docker/raw/main/snortunsock-master.zip \
-    && unzip snortunsock-master.zip
+RUN cd /work && wget https://download.open-mpi.org/release/hwloc/v2.5/hwloc-2.5.0.tar.gz
+RUN cd /work && tar -xvf hwloc-2.5.0.tar.gz && cd hwloc-2.5.0 && ./configure && make && make install
+RUN cd /work && rm -rf hwloc-2.5.0 && rm hwloc-2.5.0.tar.gz
 
-# ENV SNORT_RULES_SNAPSHOT 2972
-# ADD snortrules-snapshot-${SNORT_RULES_SNAPSHOT} /opt
-ADD mysnortrules /opt
-RUN mkdir -p /var/log/snort && \
-    mkdir -p /usr/local/lib/snort_dynamicrules && \
-    mkdir -p /etc/snort && \
-    # mkdir -p /etc/snort/rules && \
-    # mkdir -p /etc/snort/preproc_rules && \
-    # mkdir -p /etc/snort/so_rules && \
-    # mkdir -p /etc/snort/etc && \
+RUN cd /work && wget https://luajit.org/download/LuaJIT-2.1.0-beta3.tar.gz
+RUN cd /work && tar -xvf LuaJIT-2.1.0-beta3.tar.gz && cd LuaJIT-2.1.0-beta3 && make && make install
+RUN cd /work && rm -rf LuaJIT-2.1.0-beta3 && rm LuaJIT-2.1.0-beta3.tar.gz
 
-    # mysnortrules rules
-    cp -r /opt/rules /etc/snort/rules && \
-    # Due to empty folder so mkdir
-    mkdir -p /etc/snort/preproc_rules && \
-    mkdir -p /etc/snort/so_rules && \
-    # cp -r /opt/preproc_rules /etc/snort/preproc_rules && \
-    # cp -r /opt/so_rules /etc/snort/so_rules && \
-    cp -r /opt/etc /etc/snort/etc && \
+RUN cd /work && wget https://sourceforge.net/projects/pcre/files/pcre/8.45/pcre-8.45.tar.gz
+RUN cd /work && tar -xvf pcre-8.45.tar.gz && cd pcre-8.45 && ./configure && make && make install
+RUN cd /work && rm -rf pcre-8.45 && rm pcre-8.45.tar.gz
 
-    # snapshot2972 rules
-    # cp -r /opt/rules /etc/snort/rules && \
-    # cp -r /opt/preproc_rules /etc/snort/preproc_rules && \
-    # cp -r /opt/so_rules /etc/snort/so_rules && \
-    # cp -r /opt/etc /etc/snort/etc && \
+RUN cd /work && wget https://github.com/madler/zlib/releases/download/v1.2.13/zlib-1.2.13.tar.gz
+RUN cd /work && tar -xvf zlib-1.2.13.tar.gz && cd zlib-1.2.13 && ./configure && make && make install
+RUN cd /work && rm -rf zlib-1.2.13 && rm zlib-1.2.13.tar.gz
 
-    # touch /etc/snort/rules/local.rules && \
-    touch /etc/snort/rules/white_list.rules /etc/snort/rules/black_list.rules
+ENV SNORT_VER=3.1.53.0
+RUN cd /work && wget https://github.com/snort3/snort3/archive/refs/tags/${SNORT_VER}.tar.gz
+RUN cd /work && tar -xvf ${SNORT_VER}.tar.gz && cd snort3-${SNORT_VER} && export my_path=/usr/local && ./configure_cmake.sh --prefix=$my_path
+RUN cd /work/snort3-${SNORT_VER}/build && make -j 6 install
 
-# Clean up APT when done.
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-    /opt/snort-${SNORT_VERSION}.tar.gz /opt/daq-${DAQ_VERSION}.tar.gz
-
-
-ENV NETWORK_INTERFACE eth0
-# Validate an installation
-# snort -T -i eth0 -c /etc/snort/etc/snort.conf
-CMD ["snort", "-T", "-i", "echo ${NETWORK_INTERFACE}", "-c", "/etc/snort/etc/snort.conf"]
+RUN tar -zcvpf /packages/libpcre.tar.gz /usr/local/lib/libpcre.so*
+RUN tar -zcvpf /packages/libluajit.tar.gz /usr/local/lib/libluajit*.so*
+RUN tar -zcvpf /packages/libhwloc.tar.gz /usr/local/lib/libhwloc.so*
+RUN tar -zcvpf /packages/libdnet.tar.gz /usr/local/lib/libdnet.so*
+RUN tar -zcvpf /packages/snort3.tar.gz /usr/local/bin/snort /usr/local/lib/daq /usr/local/etc/snort/ /usr/local/lib/libdaq.so*
