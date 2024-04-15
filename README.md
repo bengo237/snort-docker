@@ -1,4 +1,4 @@
-# docker-snort
+# docker Snort3
 
 [Snort](https://www.snort.org/) in Docker for Network Functions Virtualization (NFV)
 
