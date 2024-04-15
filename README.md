@@ -1,6 +1,12 @@
-# docker-snort snort3-3.1.53.0
+# docker Snort3
 
 [Snort](https://www.snort.org/) in Docker for Network Functions Virtualization (NFV)
+
+
+# Verify Snort setting 
+```
+$ snort -c /usr/local/etc/snort/snort.lua 
+```
 
 # Docker Usage
 You may need to run as `sudo`
