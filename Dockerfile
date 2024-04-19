@@ -60,6 +60,8 @@ ENV SNORT_VER=3.1.53.0
 RUN cd /work && wget https://github.com/snort3/snort3/archive/refs/tags/${SNORT_VER}.tar.gz
 RUN cd /work && tar -xvf ${SNORT_VER}.tar.gz && cd snort3-${SNORT_VER} && export my_path=/usr/local && ./configure_cmake.sh --prefix=$my_path
 RUN cd /work/snort3-${SNORT_VER}/build && make -j 6 install
+# Add the snort3-community-rules folder to the Docker image
+ADD snort/snort3-community-rules/ /work/snort3-3.1.53.0/
 
 RUN tar -zcvpf /packages/libpcre.tar.gz /usr/local/lib/libpcre.so*
 RUN tar -zcvpf /packages/libluajit.tar.gz /usr/local/lib/libluajit*.so*
