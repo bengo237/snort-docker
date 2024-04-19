@@ -7,7 +7,7 @@ RUN apt-get update && apt -y install \
     git libtool pkg-config autoconf gettext \
     libpcap-dev g++ vim make cmake wget libssl-dev \
     liblzma-dev pip unzip protobuf-compiler \
-    golang-goprotobuf-dev
+    golang-goprotobuf-dev nano
 
 ENV GO_BIN=go1.20.linux-amd64.tar.gz
 RUN wget https://dl.google.com/go/${GO_BIN} \
