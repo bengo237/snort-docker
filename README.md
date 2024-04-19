@@ -1,50 +1,25 @@
-# docker Snort3
+```markdown
+# Snort3 Dockerization
 
-[Snort](https://www.snort.org/) in Docker for Network Functions Virtualization (NFV)
+This repository offers a Dockerized deployment of [Snort3](https://www.snort.org/), a robust network intrusion prevention system, facilitating the utilization of Snort3 for Network Functions Virtualization (NFV).
 
+## Verifying Snort Configuration
 
-# Verify Snort setting 
-```
-$ snort -c /usr/local/etc/snort/snort.lua 
-```
+To validate the Snort configuration, execute the following command:
 
-# Docker Usage
-You may need to run as `sudo`
-Attach the snort in container to have full access to the network
-
-```
-$ docker run -it --rm --net=host ghcr.io/bengo237/snort3:latest /bin/bash
+```bash
+snort -c /usr/local/etc/snort/snort.lua 
 ```
 
-Or you may need to add --cap-add=NET_ADMIN or --privileged (unsafe)
+## Docker Image Usage
 
-```
-$ docker run -it --rm --net=host --cap-add=NET_ADMIN ghcr.io/bengo237/snort3:latest /bin/bash
-```
+Note: Depending on your setup, you may require `sudo` for Docker commands.
 
+To launch the Snort3 Docker container with complete network access, utilize the following command:
 
-# Snort Usage
-
-For testing it's work. Add this rule in the file at `/etc/snort/rules/local.rules`
-
-```
-alert icmp any any -> any any (msg:"Pinging...";sid:1000004;)
+```bash
+docker run -it --rm --net=host ghcr.io/bengo237/snort3:latest /bin/bash
 ```
 
-Running Snort and alerts output to the console (screen).
-
-```
-$ snort -i eth0 -c /etc/snort/etc/snort.conf -A console
-```
-
-Running Snort and alerts output to the UNIX socket
-
-```
-$ snort -i eth0 -A unsock -l /tmp -c /etc/snort/etc/snort.conf
-```
-
-Ping in the container then the alert message will show on the console
-
-```
-ping 8.8.8.8
+In certain scenarios, you might need to append `--cap-add=NET_ADMIN` or `--privileged` to the Docker command. Nonetheless, exercising caution is advised when using `--privileged` since it grants all capabilities to the container, warranting careful consideration.
 ```

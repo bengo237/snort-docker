@@ -7,7 +7,7 @@ RUN apt-get update && apt -y install \
     git libtool pkg-config autoconf gettext \
     libpcap-dev g++ vim make cmake wget libssl-dev \
     liblzma-dev pip unzip protobuf-compiler \
-    golang-goprotobuf-dev
+    golang-goprotobuf-dev nano
 
 ENV GO_BIN=go1.20.linux-amd64.tar.gz
 RUN wget https://dl.google.com/go/${GO_BIN} \
@@ -60,7 +60,8 @@ ENV SNORT_VER=3.1.53.0
 RUN cd /work && wget https://github.com/snort3/snort3/archive/refs/tags/${SNORT_VER}.tar.gz
 RUN cd /work && tar -xvf ${SNORT_VER}.tar.gz && cd snort3-${SNORT_VER} && export my_path=/usr/local && ./configure_cmake.sh --prefix=$my_path
 RUN cd /work/snort3-${SNORT_VER}/build && make -j 6 install
-
+# Add the snort3-community-rules folder to the Docker image
+ADD snort3-community-rules/ /work/snort3-3.1.53.0/lua
 RUN tar -zcvpf /packages/libpcre.tar.gz /usr/local/lib/libpcre.so*
 RUN tar -zcvpf /packages/libluajit.tar.gz /usr/local/lib/libluajit*.so*
 RUN tar -zcvpf /packages/libhwloc.tar.gz /usr/local/lib/libhwloc.so*
