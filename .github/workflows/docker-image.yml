@@ -1,8 +1,9 @@
-name: Docker Image CI
+name: Snort3 Docker Image CI/CD
 
 on:
   push:
-    branches: [ develop ]
+    branches: 
+      - develop
 
 jobs:
   build:

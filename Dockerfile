@@ -1,7 +1,7 @@
 # Use the base Ubuntu 20.04 image
 FROM --platform=$BUILDPLATFORM ubuntu:20.04
 
-LABEL maintainer="Dylane Bengono <chaneldylanebengono@gmail.com>"
+LABEL maintainer="DYLANE BENGONO <chaneldylanebengono@gmail.com>"
 
 # Disable interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
@@ -40,7 +40,7 @@ RUN go install github.com/golang/protobuf/protoc-gen-go@v1.5.2 && \
 RUN mkdir /work /packages
 
 # Copy Snort rules
-COPY snort3-community-rules/snort3.rules /work/
+COPY rules/snort3.rules /work/
 
 # build libdaq
 ENV LIBDAQ_VERSION=3.0.15
@@ -75,10 +75,9 @@ RUN cd /work && wget https://download.open-mpi.org/release/hwloc/v2.5/hwloc-${HW
 
 # Install LuaJIT
 ENV LUAJIT_VERSION=2.1.0-beta3
-RUN cd /work && wget https://luajit.org/download/LuaJIT-${LUAJIT_VERSION}.tar.gz && \
-    tar -xvf LuaJIT-${LUAJIT_VERSION}.tar.gz && \
-    cd LuaJIT-${LUAJIT_VERSION} && make && make install && \
-    cd /work && rm -rf LuaJIT-${LUAJIT_VERSION} LuaJIT-${LUAJIT_VERSION}.tar.gz
+RUN cd /work && git clone https://luajit.org/git/luajit.git && \
+    cd luajit && make && make install && \
+    cd /work && rm -rf luajit
 
 # Install PCRE
 ENV PCRE_VERSION=8.45
@@ -104,10 +103,3 @@ RUN cd /work && wget https://github.com/snort3/snort3/archive/refs/tags/${SNORT_
 
 # Move Snort rules to appropriate directory
 RUN mv /work/snort3.rules /usr/local/etc/snort
-
-# Create tar archives of libraries and Snort
-RUN tar -zcvpf /packages/libpcre.tar.gz /usr/local/lib/libpcre.so* && \
-    tar -zcvpf /packages/libluajit.tar.gz /usr/local/lib/libluajit*.so* && \
-    tar -zcvpf /packages/libhwloc.tar.gz /usr/local/lib/libhwloc.so* && \
-    tar -zcvpf /packages/libdnet.tar.gz /usr/local/lib/libdnet.so* && \
-    tar -zcvpf /packages/snort3.tar.gz /usr/local/bin/snort /usr/local/lib/daq /usr/local/etc/snort /usr/local/lib/libdaq.so*
