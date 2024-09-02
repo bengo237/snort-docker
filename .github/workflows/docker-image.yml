@@ -1,4 +1,4 @@
-name: Snoet3 Docker Image CI/CD
+name: Snort3 Docker Image CI/CD
 
 on:
   push:
