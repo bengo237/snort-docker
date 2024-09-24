@@ -11,8 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git libtool pkg-config autoconf gettext \
     libpcap-dev g++ vim make cmake wget libssl-dev \
     liblzma-dev python3-pip unzip protobuf-compiler \
-    golang nano net-tools automake \
-    libhwloc-dev libdnet-dev flex bison \
+    golang nano net-tools automake bison flex \
+    libhwloc-dev libpcre3-dev zlib1g-dev libdnet-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Determine architecture and download appropriate Go version
@@ -43,24 +43,14 @@ RUN mkdir /work /packages
 # Copy Snort rules
 COPY rules/snort3.rules /work/
 
-# build libdaq
+# Build libdaq
 ENV LIBDAQ_VERSION=3.0.15
-RUN cd /work && wget https://github.com/snort3/libdaq/archive/refs/tags/v${LIBDAQ_VERSION}.tar.gz
-RUN cd /work && tar -xvf v${LIBDAQ_VERSION}.tar.gz
-RUN cd /work/libdaq-${LIBDAQ_VERSION} && ./bootstrap && ./configure && make && make install
-RUN cd /work && rm -rf v${LIBDAQ_VERSION}.tar.gz
+RUN cd /work && wget https://github.com/snort3/libdaq/archive/refs/tags/v${LIBDAQ_VERSION}.tar.gz && \
+    tar -xvf v${LIBDAQ_VERSION}.tar.gz && \
+    cd libdaq-${LIBDAQ_VERSION} && ./bootstrap && ./configure && make && make install && \
+    cd /work && rm -rf v${LIBDAQ_VERSION}.tar.gz
 
-# Install libdnet
-ENV LIBDNET_VERSION=1.14
-RUN cd /work && wget https://github.com/ofalk/libdnet/archive/refs/tags/libdnet-${LIBDNET_VERSION}.tar.gz && \
-    tar -xvf libdnet-${LIBDNET_VERSION}.tar.gz && \
-    cd libdnet-libdnet-${LIBDNET_VERSION} && \
-    wget -O config.guess 'https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD' && \
-    wget -O config.sub 'https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' && \
-    ./configure && make && make install && \
-    cd /work && rm -rf libdnet-libdnet-${LIBDNET_VERSION} libdnet-${LIBDNET_VERSION}.tar.gz
-
-# Install flex >= 2.6.0
+# Install flex
 ENV FLEX_VERSION=2.6.4
 RUN cd /work && wget https://github.com/westes/flex/files/981163/flex-${FLEX_VERSION}.tar.gz && \
     tar -xvf flex-${FLEX_VERSION}.tar.gz && \
@@ -94,20 +84,21 @@ RUN cd /work && wget https://github.com/madler/zlib/releases/download/v${ZLIB_VE
     cd zlib-${ZLIB_VERSION} && ./configure && make && make install && \
     cd /work && rm -rf zlib-${ZLIB_VERSION} zlib-${ZLIB_VERSION}.tar.gz
 
-# Install OpenSSL
-ENV OPENSSL_VERSION=1.1.1
-RUN cd /work && wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz && \
-    tar -xvf openssl-${OPENSSL_VERSION}.tar.gz && \
-    cd openssl-${OPENSSL_VERSION} && ./config && make && make install && \
-    cd /work && rm -rf openssl-${OPENSSL_VERSION} openssl-${OPENSSL_VERSION}.tar.gz
-
 # Install Snort 3.3.5.0
 ENV SNORT_VER=3.3.5.0
 RUN cd /work && wget https://github.com/snort3/snort3/archive/refs/tags/${SNORT_VER}.tar.gz && \
     tar -xvf ${SNORT_VER}.tar.gz && \
     cd snort3-${SNORT_VER} && export my_path=/usr/local && ./configure_cmake.sh --prefix=$my_path && \
-    cd build && make -j$(nproc) install && \
+    cd build && make -j$(nproc) install || cat /var/log/dpkg.log && \
     cd /work && rm -rf snort3-${SNORT_VER} ${SNORT_VER}.tar.gz
 
 # Move Snort rules to appropriate directory
 RUN mv /work/snort3.rules /usr/local/etc/snort
+
+# Clean up to reduce image size
+RUN apt-get purge -y --auto-remove \
+    git libtool pkg-config autoconf gettext vim cmake wget unzip protobuf-compiler golang nano automake bison \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Set entrypoint for Snort
+ENTRYPOINT ["/usr/local/bin/snort"]
