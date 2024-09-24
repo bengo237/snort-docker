@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpcap-dev g++ vim make cmake wget libssl-dev \
     liblzma-dev python3-pip unzip protobuf-compiler \
     golang nano net-tools automake \
+    libhwloc-dev libdnet-dev flex bison \
     && rm -rf /var/lib/apt/lists/*
 
 # Determine architecture and download appropriate Go version
@@ -59,7 +60,7 @@ RUN cd /work && wget https://github.com/ofalk/libdnet/archive/refs/tags/libdnet-
     ./configure && make && make install && \
     cd /work && rm -rf libdnet-libdnet-${LIBDNET_VERSION} libdnet-${LIBDNET_VERSION}.tar.gz
 
-# Install flex
+# Install flex >= 2.6.0
 ENV FLEX_VERSION=2.6.4
 RUN cd /work && wget https://github.com/westes/flex/files/981163/flex-${FLEX_VERSION}.tar.gz && \
     tar -xvf flex-${FLEX_VERSION}.tar.gz && \
@@ -93,8 +94,15 @@ RUN cd /work && wget https://github.com/madler/zlib/releases/download/v${ZLIB_VE
     cd zlib-${ZLIB_VERSION} && ./configure && make && make install && \
     cd /work && rm -rf zlib-${ZLIB_VERSION} zlib-${ZLIB_VERSION}.tar.gz
 
-# Install Snort 3
-ENV SNORT_VER=3.2.2.0
+# Install OpenSSL
+ENV OPENSSL_VERSION=1.1.1
+RUN cd /work && wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz && \
+    tar -xvf openssl-${OPENSSL_VERSION}.tar.gz && \
+    cd openssl-${OPENSSL_VERSION} && ./config && make && make install && \
+    cd /work && rm -rf openssl-${OPENSSL_VERSION} openssl-${OPENSSL_VERSION}.tar.gz
+
+# Install Snort 3.3.5.0
+ENV SNORT_VER=3.3.5.0
 RUN cd /work && wget https://github.com/snort3/snort3/archive/refs/tags/${SNORT_VER}.tar.gz && \
     tar -xvf ${SNORT_VER}.tar.gz && \
     cd snort3-${SNORT_VER} && export my_path=/usr/local && ./configure_cmake.sh --prefix=$my_path && \
