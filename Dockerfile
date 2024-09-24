@@ -18,11 +18,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Determine architecture and download appropriate Go version
 RUN ARCH=$(dpkg --print-architecture) && \
     if [ "$ARCH" = "amd64" ]; then \
-    GO_BIN=go1.22.4.linux-amd64.tar.gz; \
+        GO_BIN=go1.22.4.linux-amd64.tar.gz; \
     elif [ "$ARCH" = "arm64" ]; then \
-    GO_BIN=go1.22.4.linux-arm64.tar.gz; \
+        GO_BIN=go1.22.4.linux-arm64.tar.gz; \
     else \
-    echo "Unsupported architecture"; exit 1; \
+        echo "Unsupported architecture"; exit 1; \
     fi && \
     wget https://go.dev/dl/${GO_BIN} && \
     tar -xvf ${GO_BIN} && \
@@ -88,15 +88,17 @@ RUN cd /work && wget https://github.com/madler/zlib/releases/download/v${ZLIB_VE
 ENV SNORT_VER=3.3.5.0
 RUN cd /work && wget https://github.com/snort3/snort3/archive/refs/tags/${SNORT_VER}.tar.gz && \
     tar -xvf ${SNORT_VER}.tar.gz && \
-    cd snort3-${SNORT_VER} && export my_path=/usr/local && ./configure_cmake.sh --prefix=$my_path && \
-    cd build && make -j$(nproc) install || cat /var/log/dpkg.log && \
+    cd snort3-${SNORT_VER} && ./configure_cmake.sh --prefix=/usr/local && \
+    cd build && make -j$(nproc) install && \
     cd /work && rm -rf snort3-${SNORT_VER} ${SNORT_VER}.tar.gz
 
 # Move Snort rules to appropriate directory
 RUN mv /work/snort3.rules /usr/local/etc/snort
 
+# Set the entrypoint to snort
+ENTRYPOINT ["/usr/local/bin/snort"]
+
 # Clean up to reduce image size
 RUN apt-get purge -y --auto-remove \
     git libtool pkg-config autoconf gettext vim cmake wget unzip protobuf-compiler golang nano automake bison \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
