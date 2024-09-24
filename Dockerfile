@@ -94,7 +94,7 @@ RUN cd /work && wget https://github.com/madler/zlib/releases/download/v${ZLIB_VE
     cd /work && rm -rf zlib-${ZLIB_VERSION} zlib-${ZLIB_VERSION}.tar.gz
 
 # Install Snort 3
-ENV SNORT_VER=3.2.2.0
+ENV SNORT_VER=3.3.5.0
 RUN cd /work && wget https://github.com/snort3/snort3/archive/refs/tags/${SNORT_VER}.tar.gz && \
     tar -xvf ${SNORT_VER}.tar.gz && \
     cd snort3-${SNORT_VER} && export my_path=/usr/local && ./configure_cmake.sh --prefix=$my_path && \
