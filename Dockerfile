@@ -11,37 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git libtool pkg-config autoconf gettext \
     libpcap-dev g++ vim make cmake wget libssl-dev \
     liblzma-dev python3-pip unzip protobuf-compiler \
-    golang nano net-tools automake flex hwloc libpcre3-dev \
-    zlib1g-dev \
+    golang nano net-tools automake \
     && rm -rf /var/lib/apt/lists/*
-
-# Install daq
-RUN git clone https://github.com/snort3/libdaq.git && \
-    cd libdaq && \
-    ./bootstrap && \
-    ./configure && \
-    make && \
-    make install && \
-    cd .. && \
-    rm -rf libdaq
-
-# Install dnet
-RUN git clone https://github.com/dugsong/libdnet.git && \
-    cd libdnet && \
-    ./configure && \
-    make && \
-    make install && \
-    cd .. && \
-    rm -rf libdnet
-
-# Install LuaJIT
-RUN wget http://luajit.org/download/LuaJIT-2.0.5.tar.gz && \
-    tar -xvf LuaJIT-2.0.5.tar.gz && \
-    cd LuaJIT-2.0.5 && \
-    make && \
-    make install && \
-    cd .. && \
-    rm -rf LuaJIT-2.0.5 LuaJIT-2.0.5.tar.gz
 
 # Determine architecture and download appropriate Go version
 RUN ARCH=$(dpkg --print-architecture) && \
@@ -66,7 +37,6 @@ RUN go install github.com/golang/protobuf/protoc-gen-go@v1.5.2 && \
     mv /root/go/bin/protoc-gen-go-grpc /usr/local/bin/
 
 # Create working directories
-
 RUN mkdir /work /packages
 
 # Copy Snort rules
@@ -124,7 +94,7 @@ RUN cd /work && wget https://github.com/madler/zlib/releases/download/v${ZLIB_VE
     cd /work && rm -rf zlib-${ZLIB_VERSION} zlib-${ZLIB_VERSION}.tar.gz
 
 # Install Snort 3
-ENV SNORT_VER=3.3.5.0
+ENV SNORT_VER=3.2.2.0
 RUN cd /work && wget https://github.com/snort3/snort3/archive/refs/tags/${SNORT_VER}.tar.gz && \
     tar -xvf ${SNORT_VER}.tar.gz && \
     cd snort3-${SNORT_VER} && export my_path=/usr/local && ./configure_cmake.sh --prefix=$my_path && \
