@@ -100,5 +100,3 @@ RUN apt-get purge -y --auto-remove \
     git libtool pkg-config autoconf gettext vim cmake wget unzip protobuf-compiler golang nano automake bison \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Set entrypoint for Snort
-ENTRYPOINT ["/usr/local/bin/snort"]
