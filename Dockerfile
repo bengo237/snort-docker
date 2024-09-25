@@ -1,5 +1,5 @@
 # Use a smaller base image
-FROM --platform=$BUILDPLATFORM ubuntu:20.04-slim AS build-stage
+FROM ubuntu:20.04-slim AS build-stage
 
 LABEL maintainer="DYLANE BENGONO <chaneldylanebengono@gmail.com>"
 
