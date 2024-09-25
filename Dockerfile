@@ -93,8 +93,17 @@ RUN cd /work && wget https://github.com/madler/zlib/releases/download/v${ZLIB_VE
     cd zlib-${ZLIB_VERSION} && ./configure && make && make install && \
     cd /work && rm -rf zlib-${ZLIB_VERSION} zlib-${ZLIB_VERSION}.tar.gz
 
+# Define the version of LibML you want to install
+ENV LIBML_VERSION=1.1.0
+# Download, extract, build, and install LibML
+RUN cd /work && wget https://github.com/snort3/libml/archive/refs/tags/${LIBML_VERSION}.tar.gz && \
+    tar -xvf ${LIBML_VERSION}.tar.gz && \
+    cd libml-${LIBML_VERSION} && ./configure.sh && make && make install && \
+    cd /work && rm -rf libml-${LIBML_VERSION} ${LIBML_VERSION}.tar.gz
+
+
 # Install Snort 3
-ENV SNORT_VER=3.3.1.0
+ENV SNORT_VER=3.3.2.0
 RUN cd /work && wget https://github.com/snort3/snort3/archive/refs/tags/${SNORT_VER}.tar.gz && \
     tar -xvf ${SNORT_VER}.tar.gz && \
     cd snort3-${SNORT_VER} && chmod +x configure_cmake.sh && ./configure_cmake.sh --prefix=/usr/local && \
