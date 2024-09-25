@@ -106,7 +106,7 @@ RUN cd /work && wget https://github.com/snort3/libml/archive/refs/tags/${LIBML_V
 
 
 # Install Snort 3
-ENV SNORT_VER=3.3.2.0
+ENV SNORT_VER=3.3.1.0
 RUN cd /work && wget https://github.com/snort3/snort3/archive/refs/tags/${SNORT_VER}.tar.gz && \
     tar -xvf ${SNORT_VER}.tar.gz && \
     cd snort3-${SNORT_VER} && chmod +x configure_cmake.sh && ./configure_cmake.sh --prefix=/usr/local && \
