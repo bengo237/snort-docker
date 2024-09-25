@@ -95,10 +95,13 @@ RUN cd /work && wget https://github.com/madler/zlib/releases/download/v${ZLIB_VE
 
 # Define the version of LibML you want to install
 ENV LIBML_VERSION=1.1.0
-# Download, extract, build, and install LibML
+# Download, extract, and install LibML
 RUN cd /work && wget https://github.com/snort3/libml/archive/refs/tags/${LIBML_VERSION}.tar.gz && \
     tar -xvf ${LIBML_VERSION}.tar.gz && \
-    cd libml-${LIBML_VERSION} && ./configure.sh && make && make install && \
+    cd libml-${LIBML_VERSION} && \
+    chmod +x configure.sh && ./configure.sh && \
+    mkdir build && cd build && \
+    make -j$(nproc) && make install && \
     cd /work && rm -rf libml-${LIBML_VERSION} ${LIBML_VERSION}.tar.gz
 
 
