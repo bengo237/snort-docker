@@ -1,4 +1,4 @@
-# Use a smaller base image
+# Use a base Ubuntu 20.04 image for building
 FROM ubuntu:20.04 AS build-stage
 
 LABEL maintainer="DYLANE BENGONO <chaneldylanebengono@gmail.com>"
@@ -74,11 +74,16 @@ RUN cd /work && wget https://github.com/snort3/snort3/archive/refs/tags/${SNORT_
     cd build && make -j$(nproc) VERBOSE=1 install
 
 # Final stage - use a smaller base image
-FROM ubuntu:20.04-slim
+FROM ubuntu:20.04
 
+# Copy compiled binaries and libraries from build stage
 COPY --from=build-stage /usr/local /usr/local
 
 # Copy Snort rules
 COPY rules/snort3.rules /usr/local/etc/snort
+
+# Reduce image size by removing unnecessary packages
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENTRYPOINT ["/usr/local/bin/snort"]
