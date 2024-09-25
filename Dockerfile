@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git libtool pkg-config autoconf gettext \
     libpcap-dev g++ vim make cmake wget libssl-dev \
     liblzma-dev python3-pip unzip protobuf-compiler \
-    golang nano net-tools automake \
+    golang nano net-tools automake build-essential  \
     && rm -rf /var/lib/apt/lists/*
 
 # Determine architecture and download appropriate Go version
