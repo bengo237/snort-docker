@@ -101,7 +101,7 @@ RUN cd /work && wget https://github.com/snort3/libml/archive/refs/tags/${LIBML_V
     cd libml-${LIBML_VERSION} && \
     chmod +x configure.sh && ./configure.sh && \
     mkdir build && cd build && \
-    make -j$(nproc) && make install && \
+    cmake .. && make -j$(nproc) && make install && \
     cd /work && rm -rf libml-${LIBML_VERSION} ${LIBML_VERSION}.tar.gz
 
 
