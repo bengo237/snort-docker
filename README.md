@@ -1,5 +1,5 @@
 [![Snort3 Docker Image CI/CD](https://github.com/bengo237/snort-docker/actions/workflows/build-snort3.yml/badge.svg)](https://github.com/bengo237/snort-docker/actions/workflows/build-snort3.yml)
-# Snort3 Docker  3.3.1.0
+# Effortless Network Security with Snort3 3.3.1.0 in Docker
 
 This repository provides a Dockerized deployment of [Snort3](https://www.snort.org/), a powerful network intrusion prevention system. It simplifies the use of Snort3 for Network Functions Virtualization (NFV).
 
